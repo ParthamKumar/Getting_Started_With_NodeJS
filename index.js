@@ -1,27 +1,14 @@
-// lib.js
-console.log("lib.js Loaded");
+const fs = require('fs')
 
-exports.sum = (a, b) => {
-    return a + b; // Corrected to perform addition
-};
- function diff(a,b){
-    return a-b
- }
+// const txt = fs.readFileSync('demo.txt','utf-8')
+// console.log(txt)
 
- function add(a,b,c){
-    return a+b
- }
- 
- function sub(a,b,c){
-    return a-(b+c)
- }
+const t1 = performance.now()
 
- exports.diff = diff
+fs.readFile('demo.txt','utf-8',(err,txt)=>{
+    console.log(txt)
+})
 
-//  export {add,sub}
+const t2 = performance.now()
 
-
-// We also can import and export the modules via object formate
-            // for this we have to make the package.json file 
-            // for ES modules
-            
+console.log("Time Diff",t2-t1)
