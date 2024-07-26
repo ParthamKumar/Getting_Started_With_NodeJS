@@ -1,2 +1,0 @@
-Hello this is the text file
-an we are reading the data from the text file
