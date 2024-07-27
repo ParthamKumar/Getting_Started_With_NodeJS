@@ -1,59 +1,89 @@
-const http = require("http");
 const fs = require("fs");
-const { url } = require("inspector");
 
 const index = fs.readFileSync("index.html", "utf-8");
 const data = JSON.parse(fs.readFileSync("data.json", "utf-8"));
 const products = data.products;
 // Create a local server to receive data from
 
-const server = http.createServer((req, res) => {
-  console.log(req.url,url.method);
+const express = require("express");
+const morgan = require('morgan')
 
-    if(req.url.startsWith('/product')){
-     const id = req.url.split('/')[2]
-     const product = products.find(p=>p.id===(+id))
-     console.log(product)
-     res.setHeader("Content-Type", "text/html");
-      let modifiedIndex = index
-        .replace("**title**", product.title)
-        .replace("**url**", product.thumbnail)
-        .replace("**price**", product.price)
-        .replace("**rating**", product.rating)
-      res.end(modifiedIndex);
-      return;
-    }
-  //  "/product":
-  //     res.setHeader("Content-Type", "text/html");
-  //     let modifiedIndex = index
-  //       .replace("**title**", product.title)
-  //       .replace("**url**", product.thumbnail)
-  //       .replace("**price**", product.price)
-  //       .replace("**rating**", product.rating)
-  //     res.end(modifiedIndex);
-  //     break;
+// This is the start of the server
+const server = express();
 
-  switch (req.url) {
-    case "/":
-      res.setHeader("Content-Type", "text/html");
-      res.end(index);
-      break;
 
-    case "/api":
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(data));
-      break;
-    
+// bodyParser
+server.use(express.json())
+// server.use(express.urlencoded())
 
-    default:
-      res.writeHead(404);
-      res.end();
+
+server.use(morgan('default'))
+// files in the public folder will be excessed 
+server.use(express.static('public'))
+
+// This is a middleWare
+// We can use this to keep the track of the server log (Data )
+
+
+// server.use((req, res, next) => {
+//   console.log(
+//     req.method,
+//     req.ip,
+//     req.hostname,
+//     new Date(),
+//     req.get("User-Agent")
+//   );
+//   next();
+// });
+
+// instead of above we can use morgan to keep the track of logs
+
+
+
+// This also a middleWare for authentication
+const auth = (req, res, next) => {
+  // console.log(req.query);
+
+  if (req.body.password==123) {
+    next();
   }
+  else{
+    res.send(401)  
+  }
+};
 
-  console.log("Server Started");
-  // res.setHeader("Dummy", "DummyValue");
-  // res.setHeader("Content-Type", "text/html");
-  // res.end(JSON.stringify(data))
+// We can use this authentication for all or just for "get" route
+// server.use(auth)
+
+// We can call these "API" , "ENDPOINT" , "ROUTE"
+
+// "/products/:id"
+
+server.get("/", auth,(req, res) => {
+  res.json({ type: "GET" });
+});
+server.post("/", auth,(req, res) => {
+  res.json({ type: "post" });
+});
+server.put("/", (req, res) => {
+  res.json({ type: "put" });
+});
+server.delete("/", (req, res) => {
+  res.json({ type: "delete" });
+});
+server.patch("/", (req, res) => {
+  res.json({ type: "patch" });
 });
 
-server.listen(8080);
+server.get("/", (req, res) => {
+  // res.send('<h1>Hello</h1>')
+  // res.sendFile("D:/Summer 2024/React Practise/Getting_Started_With_NodeJS/index.html")
+  // res.json(products)
+
+  res.status(201).send("<h1>Hello World</h1>");
+});
+
+// This is the end of server
+server.listen(8080, () => {
+  console.log("Server Started");
+});
