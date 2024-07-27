@@ -10,78 +10,58 @@ const morgan = require('morgan')
 
 // This is the start of the server
 const server = express();
-
-
-// bodyParser
 server.use(express.json())
 // server.use(express.urlencoded())
-
-
 server.use(morgan('default'))
-// files in the public folder will be excessed 
 server.use(express.static('public'))
-
-// This is a middleWare
-// We can use this to keep the track of the server log (Data )
-
-
-// server.use((req, res, next) => {
-//   console.log(
-//     req.method,
-//     req.ip,
-//     req.hostname,
-//     new Date(),
-//     req.get("User-Agent")
-//   );
-//   next();
-// });
-
-// instead of above we can use morgan to keep the track of logs
-
-
-
-// This also a middleWare for authentication
-const auth = (req, res, next) => {
-  // console.log(req.query);
-
-  if (req.body.password==123) {
-    next();
-  }
-  else{
-    res.send(401)  
-  }
-};
-
-// We can use this authentication for all or just for "get" route
-// server.use(auth)
-
 // We can call these "API" , "ENDPOINT" , "ROUTE"
+//API ROOT , Base URL , example - google.com/api/v2/
 
-// "/products/:id"
-
-server.get("/", auth,(req, res) => {
-  res.json({ type: "GET" });
-});
-server.post("/", auth,(req, res) => {
-  res.json({ type: "post" });
-});
-server.put("/", (req, res) => {
-  res.json({ type: "put" });
-});
-server.delete("/", (req, res) => {
-  res.json({ type: "delete" });
-});
-server.patch("/", (req, res) => {
-  res.json({ type: "patch" });
+// Create POST /products      C R U D
+server.post("/products",(req, res) => {
+  console.log(req.body)
+  products.push(req.body)
+  res.status(201).json(req.body);
 });
 
-server.get("/", (req, res) => {
-  // res.send('<h1>Hello</h1>')
-  // res.sendFile("D:/Summer 2024/React Practise/Getting_Started_With_NodeJS/index.html")
-  // res.json(products)
 
-  res.status(201).send("<h1>Hello World</h1>");
+// READ  GET Products
+server.get("/products",(req, res) => {
+  res.json(products);
 });
+// READ GET /products/:id
+server.get("/products/:id",(req, res) => {
+  const id = +req.params.id
+  const product =  products.find(p=>p.id===id)
+  res.json(product);
+});
+
+// UPDATE PUT /products/:id
+server.put("/products/:id",(req, res) => {
+  const id = +req.params.id
+  const productIndex =  products.findIndex(p=>p.id===id)
+  products.splice(productIndex,1,{...req.body,id:id})
+  res.status(201).json()
+});
+// Only the selected properties will be updated (Not All The Data Will BE OverRited)
+server.patch("/products/:id",(req, res) => {
+  const id = +req.params.id
+  const productIndex =  products.findIndex(p=>p.id===id)
+  const product = products[productIndex]
+  products.splice(productIndex,1,{...product,...req.body})
+  res.status(201).json()
+});
+
+
+// DELETE Delete  /products/:id
+server.delete("/products/:id",(req, res) => {
+  const id = +req.params.id
+  const productIndex =  products.findIndex(p=>p.id===id)
+  const product = products[productIndex]
+  products.splice(productIndex,1)
+  res.status(201).json(product)
+});
+
 
 // This is the end of server
 server.listen(8080, () => {
